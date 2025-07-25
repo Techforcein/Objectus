@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="3D Force - Explore and interact with thousands of high-quality 3D models">
+  <meta name="keywords" content="3D models, Sketchfab, 3D visualization, 3D Force">
+  <title>3D Force | Advanced 3D Model Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #00f0ff;
+      --primary-dark: #00a8b5;
+      --dark-bg: #0a0a0a;
+      --darker-bg: #050505;
+      --card-bg: #1a1a1a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #b0b0b0;
+      --accent: var(--primary);
+      --glow: 0 0 10px var(--primary), 0 0 20px rgba(0, 240, 255, 0.5);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--dark-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.05) 0%, transparent 20%);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header Styles */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      padding-bottom: 1.5rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo-icon {
+      font-size: 2.5rem;
+      color: var(--primary);
+      text-shadow: var(--glow);
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--primary);
+      text-shadow: var(--glow);
+      position: relative;
+      display: inline-block;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 1.5rem;
+    }
+
+    /* Search Section */
+    .search-section {
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .search-container {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    input {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      font-size: 1.1rem;
+      background: var(--darker-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50px;
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+    }
+
+    button {
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: var(--dark-bg);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+
+    button.secondary:hover {
+      background: var(--primary);
+      color: var(--dark-bg);
+    }
+
+    button.tertiary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--text-secondary);
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    button.tertiary:hover {
+      background: var(--text-secondary);
+      color: var(--dark-bg);
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--primary);
+      color: var(--dark-bg);
+      border-color: var(--primary);
+    }
+
+    /* Results Grid */
+    #results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .model-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .model-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), var(--glow);
+      border-color: var(--primary);
+    }
+
+    .model-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+    }
+
+    .model-card:hover img {
+      transform: scale(1.03);
+    }
+
+    .model-info {
+      padding: 1.5rem;
+    }
+
+    .model-info h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .model-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .model-views {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .model-actions {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .model-actions button {
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 120px;
+      justify-content: center;
+    }
+
+    .badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      backdrop-filter: blur(5px);
+    }
+
+    /* Model Viewer */
+    #modelViewer {
+      width: 100%;
+      height: 70vh;
+      min-height: 600px;
+      margin: 3rem 0;
+      border: none;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+      display: none;
+      background: var(--darker-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #modelViewer.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+    }
+
+    .viewer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .viewer-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: var(--darker-bg);
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      border: 1px solid var(--primary);
+      box-shadow: var(--glow);
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .close-modal:hover {
+      color: var(--primary);
+    }
+
+    .modal-body {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .embed-code {
+      width: 100%;
+      height: 100px;
+      padding: 1rem;
+      background: var(--dark-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: monospace;
+      resize: none;
+    }
+
+    /* Download Options */
+    .download-options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .download-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .download-option i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .download-option:hover {
+      background: rgba(0, 240, 255, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .download-note {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 1rem;
+    }
+
+    /* Loading States */
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--primary);
+      font-size: 1.3rem;
+      grid-column: 1 / -1;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(0, 240, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 5rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .social-links a {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+
+    .social-links a:hover {
+      color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    /* Animations */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .container {
+        padding: 1.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .search-container {
+        flex-direction: column;
+      }
+      
+      button {
+        justify-content: center;
+      }
+
+      #results {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+
+      #modelViewer {
+        height: 50vh;
+        min-height: 400px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .tagline {
+        font-size: 1rem;
+      }
+
+      .search-section {
+        padding: 1.5rem;
+      }
+
+      input, button {
+        padding: 0.8rem 1.2rem;
+      }
+
+      .model-info {
+        padding: 1rem;
+      }
+
+      .model-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-cube"></i>
+        </div>
+        <h1>3D Force</h1>
+      </div>
+      <p class="tagline">Explore, interact, and experience the world's largest collection of high-quality 3D models</p>
+    </header>
+
+    <section class="search-section">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for 3D models (e.g., 'spaceship', 'character', 'architecture')" />
+        <button onclick="searchModels()">
+          <i class="fas fa-search"></i> Search
+        </button>
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterModels('all')">All</button>
+        <button class="filter-btn" onclick="filterModels('characters')">Characters</button>
+        <button class="filter-btn" onclick="filterModels('vehicles')">Vehicles</button>
+        <button class="filter-btn" onclick="filterModels('architecture')">Architecture</button>
+        <button class="filter-btn" onclick="filterModels('nature')">Nature</button>
+        <button class="filter-btn" onclick="filterModels('animals')">Animals</button>
+      </div>
+    </section>
+
+    <div id="results"></div>
+
+    <div id="viewerContainer" style="display: none;">
+      <div class="viewer-header">
+        <h2 class="viewer-title" id="viewerModelTitle">Model Viewer</h2>
+        <button class="secondary" onclick="closeViewer()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </div>
+      <iframe id="modelViewer" frameborder="0" allowfullscreen mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+    </div>
+
+    <!-- Embed Code Modal -->
+    <div class="modal" id="embedModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">  </>Embed 3D Model</h3>
+          <button class="close-modal" onclick="closeModal('embedModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Copy this code to embed the 3D model on your website:</p>
+          <textarea id="embedCode" class="embed-code" readonly></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="secondary" onclick="copyEmbedCode()">
+            <i class="fas fa-copy"></i> Copy Code
+          </button>
+          <button onclick="closeModal('embedModal')">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Modal -->
+    <div class="modal" id="downloadModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Download Options</h3>
+          <button class="close-modal" onclick="closeModal('downloadModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="downloadOptions">
+            <p>Loading download options...</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button onclick="closeModal('downloadModal')">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="social-links">
+        <a href="#" aria-label="YPUTUNEass="fab fa-youtube/a>
+        <a href="#" aria-label="Facebook"><i class="fab fa-web/i></a>
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+      </div>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact</a>
+        <a href="#">API</a>
+      </div>
+      <p>Powered by TECH FORCE<span id="currentYear"></span> 3D Force. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script>
+    const API_TOKEN = "15927cb94eea434f7dbafc46e257d8ea";
+    const resultsDiv = document.getElementById('results');
+    const modelViewer = document.getElementById('modelViewer');
+    const viewerContainer = document.getElementById('viewerContainer');
+    const viewerModelTitle = document.getElementById('viewerModelTitle');
+    const embedModal = document.getElementById('embedModal');
+    const downloadModal = document.getElementById('downloadModal');
+    const embedCode = document.getElementById('embedCode');
+    const downloadOptions = document.getElementById('downloadOptions');
+    
+    let currentModel = null;
+
+    // Set current year in footer
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Initialize with popular models
+    window.onload = function() {
+      loadPopularModels();
+    };
+
+    function loadPopularModels() {
+      resultsDiv.innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          Loading featured models...
+        </div>
+      `;
+
+      fetch(`https://api.sketchfab.com/v3/models?sort_by=-viewCount`, {
+        headers: {
+          Authorization: `Token ${API_TOKEN}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then(data => {
+        if (!data.results || data.results.length === 0) {
+          showMessage('No models found. Please try again later.');
+          return;
+        }
+        
+        displayResults(data.results.slice(0, 12)); // Show first 12 popular models
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        showMessage('Failed to fetch models. Please try again later.');
+      });
+    }
+
+    function searchModels() {
+      const query = document.getElementById("searchInput").value.trim();
+      
+      if (!query) {
+        showMessage('Please enter a search term');
+        return;
+      }
+
+      viewerContainer.style.display = 'none';
+      resultsDiv.innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          Searching for "${query}"...
+        </div>
+      `;
+
+      fetch(`https://api.sketchfab.com/v3/search?type=models&q=${encodeURIComponent(query)}`, {
+        headers: {
+          Authorization: `Token ${API_TOKEN}`
+        }
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then(data => {
+        if (!data.results || data.results.length === 0) {
+          showMessage(`No models found for "${query}". Try a different search term.`);
+          return;
+        }
+        
+        displayResults(data.results);
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        showMessage('Failed to fetch models. Please try again later.');
+      });
+    }
+
+    function filterModels(category) {
+      // Update active filter button
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // For demo purposes, we'll just show a message
+      // In a real app, you would filter the existing results or make a new API call
+      showMessage(`Showing ${category === 'all' ? 'all' : category} models...`);
+      
+      // Simulate loading
+      setTimeout(() => {
+        loadPopularModels();
+      }, 1000);
+    }
+
+    function displayResults(models) {
+      resultsDiv.innerHTML = '';
+      
+      models.forEach(model => {
+        const card = document.createElement('div');
+        card.className = 'model-card';
+        
+        const thumbnail = model.thumbnails?.images?.find(img => img.width === 720)?.url || 
+                         model.thumbnails?.images?.[0]?.url || 
+                         'https://via.placeholder.com/300x200?text=No+Preview';
+        
+        const isAnimated = model.animationCount > 0;
+        const isDownloadable = model.isDownloadable;
+        
+        card.innerHTML = `
+          <img src="${thumbnail}" alt="${model.name}" loading="lazy">
+          ${isAnimated ? '<div class="badge"><i class="fas fa-play"></i> Animated</div>' : ''}
+          ${isDownloadable ? '<div class="badge" style="right: ' + (isAnimated ? '5.5rem' : '1rem') + '"><i class="fas fa-download"></i> Downloadable</div>' : ''}
+          <div class="model-info">
+            <h3>${model.name}</h3>
+            <div class="model-meta">
+              <span>${model.user?.username || 'Unknown'}</span>
+              <span class="model-views"><i class="fas fa-eye"></i> ${model.viewCount.toLocaleString()}</span>
+            </div>
+            <div class="model-actions">
+              <button onclick="embedModel('${model.uid}', '${model.name}', '${model.viewerUrl}')">
+                <i class="fas fa-cube"></i> View 3D
+              </button>
+              <button class="secondary" onclick="window.open('${model.viewerUrl}', '_blank')">
+                <i class="fas fa-external-link-alt"></i> Details
+              </button>
+              ${isDownloadable ? `<button class="tertiary" onclick="showDownloadOptions('${model.uid}', '${model.name}', '${model.viewerUrl}')">
+                <i class="fas fa-download"></i> Download
+              </button>` : ''}
+              <button class="tertiary" onclick="showEmbedModal('${model.uid}', '${model.name}')">
+                <i class="fas fa-code"></i> Embed
+              </button>
+            </div>
+          </div>
+        `;
+        
+        resultsDiv.appendChild(card);
+      });
+    }
+
+    function embedModel(uid, name, viewerUrl) {
+      currentModel = { uid, name, viewerUrl };
+      viewerModelTitle.textContent = name;
+      modelViewer.src = `https://sketchfab.com/models/${uid}/embed`;
+      viewerContainer.style.display = 'block';
+      viewerContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeViewer() {
+      viewerContainer.style.display = 'none';
+      modelViewer.src = '';
+    }
+
+    function showEmbedModal(uid, name) {
+      const embedHtml = `<iframe width="100%" height="480" src="https://sketchfab.com/models/${uid}/embed" frameborder="0" allow="autoplay; fullscreen; vr" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>`;
+      embedCode.value = embedHtml;
+      embedModal.style.display = 'flex';
+    }
+
+    async function showDownloadOptions(uid, name, viewerUrl) {
+      currentModel = { uid, name, viewerUrl };
+      downloadOptions.innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          Loading download options...
+        </div>
+      `;
+      downloadModal.style.display = 'flex';
+      
+      try {
+        // First check if model is downloadable
+        const modelResponse = await fetch(`https://api.sketchfab.com/v3/models/${uid}`, {
+          headers: {
+            Authorization: `Token ${API_TOKEN}`
+          }
+        });
+        
+        if (!modelResponse.ok) throw new Error('Failed to fetch model details');
+        const modelData = await modelResponse.json();
+        
+        if (!modelData.isDownloadable) {
+          downloadOptions.innerHTML = `
+            <p>This model is not available for download.</p>
+            <p>Some creators choose not to make their models downloadable.</p>
+          `;
+          return;
+        }
+        
+        // Get download options
+        const downloadResponse = await fetch(`https://api.sketchfab.com/v3/models/${uid}/download`, {
+          headers: {
+            Authorization: `Token ${API_TOKEN}`
+          }
+        });
+        
+        if (!downloadResponse.ok) throw new Error('Failed to fetch download options');
+        const downloadData = await downloadResponse.json();
+        
+        if (!downloadData.gltf || !downloadData.gltf.url) {
+          downloadOptions.innerHTML = `
+            <p>No download options available for this model.</p>
+            <p>You can visit the model page to check for other download options.</p>
+            <button class="secondary" onclick="window.open('${viewerUrl}', '_blank')" style="margin-top: 1rem;">
+              <i class="fas fa-external-link-alt"></i> Visit Model Page
+            </button>
+          `;
+          return;
+        }
+        
+        // Display download options
+        downloadOptions.innerHTML = `
+          <h4>Download ${name}</h4>
+          <p>Available formats:</p>
+          <div class="download-options-grid">
+            <a href="${downloadData.gltf.url}" class="download-option" download>
+              <i class="fas fa-file-archive"></i> GLTF Format
+            </a>
+            ${downloadData.usdz?.url ? `
+              <a href="${downloadData.usdz.url}" class="download-option" download>
+                <i class="fas fa-file-archive"></i> USDZ Format
+              </a>
+            ` : ''}
+          </div>
+          <p class="download-note">Some models may have additional formats available on their Sketchfab page.</p>
+          <button class="secondary" onclick="window.open('${viewerUrl}', '_blank')" style="margin-top: 1rem;">
+            <i class="fas fa-external-link-alt"></i> View All Download Options
+          </button>
+        `;
+      } catch (error) {
+        console.error('Download error:', error);
+        downloadOptions.innerHTML = `
+          <p>Failed to load download options.</p>
+          <p>You can try visiting the model page directly:</p>
+          <button class="secondary" onclick="window.open('${viewerUrl}', '_blank')" style="margin-top: 1rem;">
+            <i class="fas fa-external-link-alt"></i> Go to Model Page
+          </button>
+        `;
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    function copyEmbedCode() {
+      embedCode.select();
+      document.execCommand('copy');
+      
+      // Change button text temporarily
+      const copyBtn = document.querySelector('.modal-footer .secondary');
+      const originalHtml = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      
+      setTimeout(() => {
+        copyBtn.innerHTML = originalHtml;
+      }, 2000);
+    }
+
+    function showMessage(msg) {
+      resultsDiv.innerHTML = `<div class="loading">${msg}</div>`;
+    }
+
+    // Allow search on Enter key
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchModels();
+      }
+    });
+  </script>
+</body>
+</html>
